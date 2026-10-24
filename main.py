@@ -21,7 +21,7 @@ from pre_deploy_hooks import (
     validate_case_sensitive_links,
 )
 from post_deploy_hook import (
-    test_url_endpoint
+    test_url_endpoint, CloudflareDeploymentFailureException, CloudflareDeployedUrlNotSetException
 )
 
 load_dotenv()
@@ -154,7 +154,14 @@ def run_pre_deploy_hooks(config: CloudflareConfig) -> None:
     print(pdh_str + exp.cyan_str(f" Validated {checked_refs} local HTML/CSS links (exact case match)"))
 
 def run_post_deploy_hooks(config: CloudflareConfig):
-    test_url_endpoint(config)
+    pdh_str = exp.underline_str("Post-deploy hook:")
+    try:
+        test_url_endpoint(config.deployed_url)
+        print(pdh_str + exp.green_str(f" {config.deployed_url} is up and available"))
+    except CloudflareDeploymentFailureException as e:
+        exp.print_exception(e)
+    except CloudflareDeployedUrlNotSetException as e:
+        exp.print_exception(e)
 
 def cloud_deploy():
     try:
