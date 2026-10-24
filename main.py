@@ -191,6 +191,7 @@ def cloud_deploy():
             timeout_seconds=360,
             poll_interval=20,
         )
+        run_post_deploy_hooks(config)
         print("Deployed version:", finished["versions"][0]["version_id"])
     except Exception as e:
         exp.print_exception(e)
